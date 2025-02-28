@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Resume Builder</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2A2A72;
+            --secondary-color: #009FFD;
+            --accent-color: #FFA400;
+            --light-bg: #f8f9fa;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--light-bg) 0%, #e6e6e6 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .container-main {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .form-section {
+            background: var(--light-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+
+        .form-control {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(0, 159, 253, 0.1);
+        }
+
+        .resume-card {
+            background: white;
+            border: none;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            transition: transform 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .resume-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+
+        .section-icon {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .preview-header {
+            text-align: center;
+            padding: 2rem;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+
+        .skill-badge {
+            background: var(--secondary-color);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            margin: 0.25rem;
+            display: inline-block;
+        }
+
+        @media (max-width: 768px) {
+            .container-main {
+                padding: 1rem;
+            }
+            
+            .resume-card {
+                margin: 0.5rem 0;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container-main">
+    <h1 class="text-center mb-4 display-4 fw-bold" style="color: var(--primary-color);">
+        <i class="fas fa-file-alt"></i> Dynamic Resume Builder
+    </h1>
+    
+    <div class="form-section">
+        <h3 class="mb-4" style="color: var(--primary-color);"><i class="fas fa-user-edit"></i> Your Information</h3>
+        <form id="resumeForm">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Full Name</label>
+                    <input type="text" class="form-control" id="name" placeholder="John Doe">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Email</label>
+                    <input type="email" class="form-control" id="email" placeholder="john@example.com">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Phone</label>
+                    <input type="text" class="form-control" id="phone" placeholder="(123) 456-7890">
+                </div>
+                <div class="col-12">
+                    <label class="form-label fw-bold">Education</label>
+                    <textarea class="form-control" id="education" rows="3" placeholder="University of Example\nB.S. in Computer Science (2020-2024)"></textarea>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Skills</label>
+                    <textarea class="form-control" id="skills" placeholder="JavaScript, Python, React, Node.js"></textarea>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Experience</label>
+                    <textarea class="form-control" id="experience" placeholder="Software Developer\nXYZ Corp (2022-Present)"></textarea>
+                </div>
+                <div class="col-12">
+                    <label class="form-label fw-bold">Hobbies</label>
+                    <textarea class="form-control" id="hobbies" placeholder="Photography, Hiking, Open Source Contributions"></textarea>
+                </div>
+                <div class="col-12 text-center mt-4">
+                    <button type="button" class="btn btn-primary mx-2" onclick="generateResume()">
+                        <i class="fas fa-magic"></i> Generate Resume
+                    </button>
+                    <button type="button" class="btn btn-success mx-2" onclick="downloadPDF()">
+                        <i class="fas fa-download"></i> Download PDF
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="preview-header">
+        <h2 id="previewName" class="mb-3">John Doe</h2>
+        <div class="d-flex justify-content-center gap-4">
+            <p class="mb-0"><i class="fas fa-envelope"></i> <span id="previewEmail">john@example.com</span></p>
+            <p class="mb-0"><i class="fas fa-phone"></i> <span id="previewPhone">(123) 456-7890</span></p>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="resume-card">
+                <div class="section-icon"><i class="fas fa-graduation-cap"></i></div>
+                <h4>Education</h4>
+                <p id="previewEducation" class="text-muted">Enter your education details</p>
+            </div>
+            <div class="resume-card">
+                <div class="section-icon"><i class="fas fa-briefcase"></i></div>
+                <h4>Experience</h4>
+                <p id="previewExperience" class="text-muted">Your professional experience</p>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="resume-card">
+                <div class="section-icon"><i class="fas fa-tools"></i></div>
+                <h4>Skills</h4>
+                <p id="previewSkills" class="text-muted">Your personal Skills</p>
+                <div id="previewSkills" class="d-flex flex-wrap"></div>
+            </div>
+            <div class="resume-card">
+                <div class="section-icon"><i class="fas fa-heart"></i></div>
+                <h4>Hobbies</h4>
+                <p id="previewHobbies" class="text-muted">Your personal interests</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="text-center py-4 text-muted">
+    <p>&copy; 2024 Resume Builder. All rights reserved.</p>
+</footer>
+
+<script>
+    function generateResume() {
+        const skills = document.getElementById('skills').value.split(',').map(skill => skill.trim());
+        const skillsHTML = skills.map(skill => `<span class="skill-badge">${skill}</span>`).join('');
+        
+        document.getElementById('previewName').textContent = document.getElementById('name').value;
+        document.getElementById('previewEmail').textContent = document.getElementById('email').value;
+        document.getElementById('previewPhone').textContent = document.getElementById('phone').value;
+        document.getElementById('previewEducation').textContent = document.getElementById('education').value;
+        document.getElementById('previewSkills').innerHTML = skillsHTML;
+        document.getElementById('previewExperience').textContent = document.getElementById('experience').value;
+        document.getElementById('previewHobbies').textContent = document.getElementById('hobbies').value;
+    }
+
+    function downloadPDF() {
+
+        const { jsPDF } = window.jspdf;
+        let doc = new jsPDF();
+
+        doc.setFont("helvetica");
+        doc.setFontSize(16);
+        doc.text("Resume", 105, 15, null, null, "center");
+
+
+        let name = document.getElementById('previewName').textContent;
+        let email = document.getElementById('previewEmail').textContent;
+        let phone = document.getElementById('previewPhone').textContent;
+        let education = document.getElementById('previewEducation').textContent;
+        let skills = document.getElementById('previewSkills').textContent;
+        let experience = document.getElementById('previewExperience').textContent;
+        let hobbies = document.getElementById('previewHobbies').textContent;
+
+
+        doc.setFontSize(12);
+        doc.setFillColor(255, 255, 255); 
+        doc.setTextColor(0, 0, 0); 
+        doc.rect(10, 25, 190, 15, 'F'); 
+        doc.text(`${name}`, 15, 35);
+        doc.setTextColor(0, 0, 0);
+        doc.text(`Email: ${email}`, 15, 45);
+        doc.text(`Phone: ${phone}`, 15, 55);
+        function drawCard(title, content, yPos) {
+            doc.setFillColor(240, 240, 240); 
+            doc.rect(10, yPos, 90, 40, 'F'); 
+            doc.rect(110, yPos, 90, 40, 'F'); 
+            doc.setTextColor(0, 0, 0);
+
+            doc.setFontSize(14);
+            doc.text(title, 15, yPos + 10);
+            doc.setFontSize(12);
+            doc.text(content, 15, yPos + 20, { maxWidth: 80 });
+
+            return yPos + 50; 
+        }
+        let yPosition = 65;
+        yPosition = drawCard("Education", education, yPosition);
+        yPosition = drawCard("Experience", experience, yPosition);
+        yPosition = drawCard("Skills", skills, yPosition);
+        yPosition = drawCard("Hobbies", hobbies, yPosition);
+
+
+        doc.save("Resume.pdf");
+    }
+
+
+
+
+</script>
+</body>
+</html>
